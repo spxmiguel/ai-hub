@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Hub — Unified AI Interface</title>
+  <meta name="description" content="One interface for Claude, ChatGPT, Gemini and local models. No tab switching." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0d0d0d;
+      --surface: #1a1a1a;
+      --border: rgba(255,255,255,0.08);
+      --fg: #f5f5f5;
+      --muted: #888;
+      --purple: #8b5cf6;
+      --purple-dim: rgba(139,92,246,0.15);
+    }
+
+    html { background: var(--bg); color: var(--fg); font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+
+    body { min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Nav */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 40px; border-bottom: 1px solid var(--border);
+    }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo-dot { width: 22px; height: 22px; background: var(--purple); border-radius: 6px; }
+    .logo-text { font-size: 15px; font-weight: 600; }
+    .nav-cta {
+      background: var(--purple); color: #fff; border: none; padding: 8px 18px;
+      border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer;
+      text-decoration: none; display: inline-block;
+    }
+    .nav-cta:hover { opacity: 0.88; }
+
+    /* Hero */
+    .hero {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center; padding: 80px 24px 60px;
+    }
+    .badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--purple-dim); border: 1px solid rgba(139,92,246,0.3);
+      color: #a78bfa; font-size: 12px; font-weight: 500;
+      padding: 4px 12px; border-radius: 999px; margin-bottom: 28px;
+    }
+    .badge-dot { width: 6px; height: 6px; background: var(--purple); border-radius: 50%; }
+    h1 { font-size: clamp(36px, 6vw, 64px); font-weight: 700; line-height: 1.1; letter-spacing: -1.5px; }
+    h1 span { color: var(--purple); }
+    .subtitle {
+      margin-top: 20px; font-size: clamp(15px, 2vw, 18px);
+      color: var(--muted); max-width: 480px; line-height: 1.6;
+    }
+    .cta-row { display: flex; gap: 12px; margin-top: 40px; flex-wrap: wrap; justify-content: center; }
+    .btn-primary {
+      background: var(--purple); color: #fff; border: none; padding: 12px 28px;
+      border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer;
+      text-decoration: none; display: inline-block; transition: opacity 0.15s;
+    }
+    .btn-primary:hover { opacity: 0.88; }
+    .btn-secondary {
+      background: var(--surface); color: var(--fg); border: 1px solid var(--border);
+      padding: 12px 28px; border-radius: 10px; font-size: 14px; font-weight: 500;
+      cursor: pointer; text-decoration: none; display: inline-block; transition: border-color 0.15s;
+    }
+    .btn-secondary:hover { border-color: rgba(255,255,255,0.2); }
+
+    /* Preview window */
+    .preview-wrap {
+      margin: 60px auto 0; max-width: 860px; width: 100%; padding: 0 24px;
+    }
+    .window {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; overflow: hidden;
+    }
+    .window-bar {
+      display: flex; align-items: center; gap: 6px; padding: 12px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 10px; height: 10px; border-radius: 50%; }
+    .dot-r { background: #ff5f57; }
+    .dot-y { background: #febc2e; }
+    .dot-g { background: #28c840; }
+    .window-title { font-size: 12px; color: var(--muted); margin: 0 auto; }
+    .window-body { display: flex; height: 380px; }
+    .sidebar {
+      width: 200px; border-right: 1px solid var(--border); padding: 12px;
+      display: flex; flex-direction: column; gap: 4px; flex-shrink: 0;
+    }
+    .sidebar-item {
+      padding: 7px 10px; border-radius: 7px; font-size: 12px; color: var(--muted);
+    }
+    .sidebar-item.active { background: rgba(255,255,255,0.06); color: var(--fg); }
+    .chat-area { flex: 1; padding: 20px; display: flex; flex-direction: column; gap: 14px; overflow: hidden; }
+    .msg { max-width: 72%; font-size: 13px; line-height: 1.5; }
+    .msg-user {
+      align-self: flex-end; background: rgba(255,255,255,0.06); border: 1px solid var(--border);
+      padding: 10px 14px; border-radius: 14px 14px 4px 14px; color: var(--fg);
+    }
+    .msg-ai {
+      align-self: flex-start; color: var(--fg);
+    }
+    .ai-label { font-size: 10px; color: var(--purple); font-weight: 600; margin-bottom: 4px; letter-spacing: 0.5px; }
+    .input-row {
+      margin-top: auto; background: rgba(255,255,255,0.04); border: 1px solid var(--border);
+      border-radius: 10px; padding: 10px 14px; font-size: 12px; color: var(--muted);
+    }
+
+    /* Features */
+    .features { padding: 80px 24px; max-width: 960px; margin: 0 auto; width: 100%; }
+    .features h2 { font-size: 28px; font-weight: 700; text-align: center; margin-bottom: 48px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 24px;
+    }
+    .card-icon { font-size: 24px; margin-bottom: 12px; }
+    .card h3 { font-size: 15px; font-weight: 600; margin-bottom: 6px; }
+    .card p { font-size: 13px; color: var(--muted); line-height: 1.6; }
+
+    /* Providers */
+    .providers { text-align: center; padding: 0 24px 80px; }
+    .providers p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+    .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; }
+    .chip {
+      background: var(--surface); border: 1px solid var(--border);
+      padding: 6px 14px; border-radius: 999px; font-size: 12px; font-weight: 500;
+    }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border); padding: 24px 40px;
+      display: flex; align-items: center; justify-content: space-between;
+      font-size: 12px; color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--fg); }
+
+    @media (max-width: 600px) {
+      nav { padding: 16px 20px; }
+      .window-bar { display: none; }
+      .sidebar { display: none; }
+      footer { flex-direction: column; gap: 8px; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="logo">
+    <div class="logo-dot"></div>
+    <span class="logo-text">AI Hub</span>
+  </div>
+  <a href="https://ai-hub-web.vercel.app" class="nav-cta">Open App →</a>
+</nav>
+
+<section class="hero">
+  <div class="badge"><div class="badge-dot"></div> Web + Desktop · Free to use</div>
+  <h1>One tab for<br /><span>every AI</span></h1>
+  <p class="subtitle">
+    Claude, ChatGPT, Gemini, Ollama — unified in one clean interface. Your memory travels with you.
+  </p>
+  <div class="cta-row">
+    <a href="https://ai-hub-web.vercel.app" class="btn-primary">Launch Web App</a>
+    <a href="https://github.com/miguelramthunmoretti/ai-hub" class="btn-secondary">View on GitHub</a>
+  </div>
+
+  <div class="preview-wrap">
+    <div class="window">
+      <div class="window-bar">
+        <div class="dot dot-r"></div>
+        <div class="dot dot-y"></div>
+        <div class="dot dot-g"></div>
+        <span class="window-title">AI Hub</span>
+      </div>
+      <div class="window-body">
+        <div class="sidebar">
+          <div class="sidebar-item active">New chat</div>
+          <div class="sidebar-item">React refactor</div>
+          <div class="sidebar-item">Design review</div>
+          <div class="sidebar-item">SQL query help</div>
+        </div>
+        <div class="chat-area">
+          <div class="msg msg-user">How do I debounce a React input?</div>
+          <div class="msg msg-ai">
+            <div class="ai-label">CLAUDE</div>
+            Use <code>useCallback</code> + a <code>useEffect</code> with a timeout ref. Cleanup on re-render to avoid stale calls.
+          </div>
+          <div class="msg msg-user">Show me the code</div>
+          <div class="msg msg-ai">
+            <div class="ai-label">CLAUDE</div>
+            <code>const timer = useRef&lt;ReturnType&lt;typeof setTimeout&gt;&gt;();<br />
+            const handleChange = (v: string) =&gt; {<br />
+            &nbsp;&nbsp;clearTimeout(timer.current);<br />
+            &nbsp;&nbsp;timer.current = setTimeout(() =&gt; onSearch(v), 300);<br />
+            };</code>
+          </div>
+          <div class="input-row">Ask anything...</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="features">
+  <h2>Everything you need. Nothing you don't.</h2>
+  <div class="grid">
+    <div class="card">
+      <div class="card-icon">🧠</div>
+      <h3>Persistent Memory</h3>
+      <p>The AI learns your preferences and projects over time. Memory lives in your Google Drive — private, portable.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">⚡</div>
+      <h3>Skills System</h3>
+      <p>Toggle modes like Caveman (ultra-terse) or UI/UX Pro. Each skill shapes how every AI responds.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🔒</div>
+      <h3>Keys Never Leave Server</h3>
+      <p>API keys live in environment variables. Your browser only ever sees streaming text — never key values.</p>
+    </div>
+    <div class="card">
+      <div class="card-icon">🖥️</div>
+      <h3>Desktop App</h3>
+      <p>Native Electron app for Mac and Windows. Adds Ollama (local AI) and CLI terminal integrations.</p>
+    </div>
+  </div>
+</section>
+
+<section class="providers">
+  <p>Supported providers</p>
+  <div class="chips">
+    <span class="chip">Claude (Anthropic)</span>
+    <span class="chip">ChatGPT (OpenAI)</span>
+    <span class="chip">Gemini (Google)</span>
+    <span class="chip">Ollama (local)</span>
+    <span class="chip">Claude CLI</span>
+  </div>
+</section>
+
+<footer>
+  <div>Built by Miguel · <a href="https://github.com/miguelramthunmoretti/ai-hub">GitHub</a></div>
+  <div><a href="https://ai-hub-web.vercel.app">Open App →</a></div>
+</footer>
+
+</body>
+</html>

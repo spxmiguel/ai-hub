@@ -1,0 +1,15 @@
+packages:
+  - 'apps/*'
+  - 'packages/*'
+
+allowBuilds:
+  electron: true
+  esbuild: true
+  node-pty: true
+  sharp: true
+
+onlyBuiltDependencies:
+  - electron
+  - esbuild
+  - node-pty
+  - sharp
