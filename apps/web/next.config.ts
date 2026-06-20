@@ -8,6 +8,13 @@ const nextConfig: NextConfig = {
     '@ai-hub/keystore',
     '@ai-hub/drive-sync',
   ],
+  webpack: (config) => {
+    config.resolve.extensionAlias = {
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+      '.jsx': ['.tsx', '.jsx'],
+    };
+    return config;
+  },
 };
 
 export default nextConfig;
