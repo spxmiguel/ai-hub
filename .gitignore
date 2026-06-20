@@ -12,3 +12,4 @@ apps/desktop/dist/
 apps/desktop/out/
 *.log
 .DS_Store
+.vercel

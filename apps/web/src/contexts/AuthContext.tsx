@@ -8,7 +8,7 @@ import {
   onAuthStateChanged,
   type User,
 } from 'firebase/auth';
-import { auth } from '@/lib/firebase';
+import { getFirebaseAuth } from '@/lib/firebase';
 
 const GOOGLE_TOKEN_KEY = 'ai-hub-google-token';
 
@@ -37,7 +37,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const stored = localStorage.getItem(GOOGLE_TOKEN_KEY);
     if (stored) setGoogleToken(stored);
 
-    const unsub = onAuthStateChanged(auth, (u) => {
+    const unsub = onAuthStateChanged(getFirebaseAuth(), (u) => {
       setUser(u);
       if (!u) {
         setGoogleToken(null);
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   async function signIn() {
     const provider = new GoogleAuthProvider();
     provider.addScope('https://www.googleapis.com/auth/drive.file');
-    const result = await signInWithPopup(auth, provider);
+    const result = await signInWithPopup(getFirebaseAuth(), provider);
     const credential = GoogleAuthProvider.credentialFromResult(result);
     if (credential?.accessToken) {
       setGoogleToken(credential.accessToken);
@@ -60,7 +60,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }
 
   async function signOut() {
-    await firebaseSignOut(auth);
+    await firebaseSignOut(getFirebaseAuth());
     setGoogleToken(null);
     localStorage.removeItem(GOOGLE_TOKEN_KEY);
   }

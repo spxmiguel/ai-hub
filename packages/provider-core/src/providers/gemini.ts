@@ -37,7 +37,7 @@ export class GeminiProvider implements AIProvider {
   async *stream(messages: Message[], opts: ChatOptions): AsyncIterable<string> {
     const model = this.client.getGenerativeModel({
       model: opts.model,
-      systemInstruction: opts.systemPrompt,
+      ...(opts.systemPrompt !== undefined && { systemInstruction: opts.systemPrompt }),
     });
 
     const history = messages

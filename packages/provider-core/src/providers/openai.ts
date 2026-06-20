@@ -47,8 +47,8 @@ export class OpenAIProvider implements AIProvider {
     const stream = await this.client.chat.completions.create({
       model: opts.model,
       messages: allMessages,
-      max_tokens: opts.maxTokens,
-      temperature: opts.temperature,
+      max_tokens: opts.maxTokens ?? null,
+      temperature: opts.temperature ?? null,
       stream: true,
     });
 

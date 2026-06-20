@@ -4,11 +4,11 @@ import type { Message } from '@ai-hub/provider-core';
 
 // API keys NEVER leave the server — read from env only, never forwarded to client.
 function getKeys() {
-  return {
-    claude: process.env.ANTHROPIC_API_KEY,
-    openai: process.env.OPENAI_API_KEY,
-    gemini: process.env.GEMINI_API_KEY,
-  };
+  const keys: { claude?: string; openai?: string; gemini?: string } = {};
+  if (process.env.ANTHROPIC_API_KEY) keys.claude = process.env.ANTHROPIC_API_KEY;
+  if (process.env.OPENAI_API_KEY) keys.openai = process.env.OPENAI_API_KEY;
+  if (process.env.GEMINI_API_KEY) keys.gemini = process.env.GEMINI_API_KEY;
+  return keys;
 }
 
 export async function POST(req: NextRequest) {

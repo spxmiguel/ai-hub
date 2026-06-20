@@ -6,6 +6,7 @@ allowBuilds:
   electron: true
   esbuild: true
   node-pty: true
+  protobufjs: set this to true or false
   sharp: true
 
 onlyBuiltDependencies:

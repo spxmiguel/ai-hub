@@ -40,9 +40,9 @@ export class ClaudeProvider implements AIProvider {
     const stream = await this.client.messages.stream({
       model: opts.model,
       max_tokens: opts.maxTokens ?? 8192,
-      system,
+      ...(system !== undefined && { system }),
       messages: userMessages.map(m => ({ role: m.role as 'user' | 'assistant', content: m.content })),
-      temperature: opts.temperature,
+      ...(opts.temperature !== undefined && { temperature: opts.temperature }),
     });
 
     for await (const event of stream) {
