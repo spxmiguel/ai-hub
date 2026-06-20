@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Plus, Search, Settings, MessageSquare } from 'lucide-react';
+import { Plus, Search, Settings, MessageSquare, Terminal, Palette } from 'lucide-react';
 import { useChatStore } from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
 import { cn } from '@/lib/cn';
@@ -63,6 +63,34 @@ export default function HubLayout({ children }: { children: React.ReactNode }) {
               className="bg-transparent outline-none text-foreground placeholder:text-muted-foreground w-full text-xs"
             />
           </div>
+        </div>
+
+        {/* Mode nav */}
+        <div className="px-2 pb-1">
+          <Link
+            href="/code"
+            className={cn(
+              'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
+              path === '/code'
+                ? 'bg-white/10 text-foreground'
+                : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+            )}
+          >
+            <Terminal size={15} />
+            <span className="text-xs">Code</span>
+          </Link>
+          <Link
+            href="/design"
+            className={cn(
+              'w-full flex items-center gap-2 px-3 py-2 rounded-lg text-sm transition-colors',
+              path === '/design'
+                ? 'bg-white/10 text-foreground'
+                : 'text-muted-foreground hover:bg-white/5 hover:text-foreground'
+            )}
+          >
+            <Palette size={15} />
+            <span className="text-xs">Design</span>
+          </Link>
         </div>
 
         {/* Conversations */}
