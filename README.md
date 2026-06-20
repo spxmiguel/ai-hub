@@ -2,7 +2,7 @@
 
 > One interface for every AI. No tab switching.
 
-**[Launch App →](https://ai-hub-web.vercel.app)** · **[Landing Page →](https://miguelramthunmoretti.github.io/ai-hub)**
+**[Launch App →](https://ai-hub-xi-seven.vercel.app)** · **[Landing Page →](https://spxmiguel.github.io/ai-hub)**
 
 ---
 
@@ -47,7 +47,7 @@ packages/
 
 ```bash
 # 1. Clone
-git clone https://github.com/miguelramthunmoretti/ai-hub
+git clone https://github.com/spxmiguel/ai-hub
 cd ai-hub
 
 # 2. Install
@@ -91,4 +91,4 @@ NEXT_PUBLIC_FIREBASE_APP_ID=
 
 ---
 
-Made by [Miguel](https://github.com/miguelramthunmoretti)
+Made by [Miguel](https://github.com/spxmiguel)
