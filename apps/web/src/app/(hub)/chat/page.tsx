@@ -17,6 +17,7 @@ export default function ChatPage() {
     activeProvider,
     activeModel,
     activeSkills,
+    apiKeys,
     isStreaming,
     newConversation,
     addMessage,
@@ -66,9 +67,14 @@ export default function ChatPage() {
 
       addMessage(convId, { role: 'assistant', content: '' });
 
+      const chatHeaders: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (apiKeys.anthropic) chatHeaders['X-Anthropic-Key'] = apiKeys.anthropic;
+      if (apiKeys.openai) chatHeaders['X-OpenAI-Key'] = apiKeys.openai;
+      if (apiKeys.gemini) chatHeaders['X-Gemini-Key'] = apiKeys.gemini;
+
       const res = await fetch('/api/chat', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: chatHeaders,
         body: JSON.stringify({ provider: activeProvider, model: activeModel, messages: msgs }),
       });
 

@@ -16,6 +16,6 @@
     "pnpm": ">=9"
   },
   "pnpm": {
-    "approvedBuilds": ["electron", "esbuild", "node-pty", "sharp"]
+    "approvedBuilds": ["electron", "esbuild", "node-pty", "sharp", "protobufjs"]
   }
 }

@@ -2,12 +2,16 @@ import { NextRequest } from 'next/server';
 import { createWebRegistry } from '@ai-hub/provider-core';
 import type { Message } from '@ai-hub/provider-core';
 
-// API keys NEVER leave the server — read from env only, never forwarded to client.
-function getKeys() {
+// Per-user keys arrive as request headers; env vars are fallback.
+// Keys are used server-side only — NEVER forwarded or returned to browser.
+function getKeys(req: NextRequest) {
   const keys: { claude?: string; openai?: string; gemini?: string } = {};
-  if (process.env.ANTHROPIC_API_KEY) keys.claude = process.env.ANTHROPIC_API_KEY;
-  if (process.env.OPENAI_API_KEY) keys.openai = process.env.OPENAI_API_KEY;
-  if (process.env.GEMINI_API_KEY) keys.gemini = process.env.GEMINI_API_KEY;
+  const claude = req.headers.get('X-Anthropic-Key') || process.env.ANTHROPIC_API_KEY;
+  const openai = req.headers.get('X-OpenAI-Key') || process.env.OPENAI_API_KEY;
+  const gemini = req.headers.get('X-Gemini-Key') || process.env.GEMINI_API_KEY;
+  if (claude) keys.claude = claude;
+  if (openai) keys.openai = openai;
+  if (gemini) keys.gemini = gemini;
   return keys;
 }
 
@@ -23,7 +27,7 @@ export async function POST(req: NextRequest) {
     return new Response('Bad request', { status: 400 });
   }
 
-  const registry = createWebRegistry(getKeys());
+  const registry = createWebRegistry(getKeys(req));
   const p = registry.get(provider);
   if (!p) {
     return new Response(`Provider "${provider}" unavailable`, { status: 503 });

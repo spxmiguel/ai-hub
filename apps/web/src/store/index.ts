@@ -19,11 +19,13 @@ interface ChatState {
   activeModel: string;
   activeSkills: string[];
   isStreaming: boolean;
+  apiKeys: { anthropic: string; openai: string; gemini: string };
 
   setActiveConversation: (id: string | null) => void;
   setProvider: (id: string) => void;
   setModel: (id: string) => void;
   toggleSkill: (id: string) => void;
+  setApiKey: (provider: 'anthropic' | 'openai' | 'gemini', key: string) => void;
   addMessage: (convId: string, msg: Message) => void;
   appendToLastMessage: (convId: string, chunk: string) => void;
   setStreaming: (v: boolean) => void;
@@ -43,6 +45,7 @@ export const useChatStore = create<ChatState>()(
       activeModel: 'claude-opus-4-5',
       activeSkills: ['caveman'],
       isStreaming: false,
+      apiKeys: { anthropic: '', openai: '', gemini: '' },
 
       setActiveConversation: id => set({ activeId: id }),
       setProvider: id => set({ activeProvider: id }),
@@ -53,6 +56,8 @@ export const useChatStore = create<ChatState>()(
             ? s.activeSkills.filter(x => x !== id)
             : [...s.activeSkills, id],
         })),
+      setApiKey: (provider, key) =>
+        set(s => ({ apiKeys: { ...s.apiKeys, [provider]: key } })),
       addMessage: (convId, msg) =>
         set(s => ({
           conversations: s.conversations.map(c =>
@@ -101,6 +106,7 @@ export const useChatStore = create<ChatState>()(
         activeProvider: s.activeProvider,
         activeModel: s.activeModel,
         activeSkills: s.activeSkills,
+        apiKeys: s.apiKeys,
       }),
     }
   )

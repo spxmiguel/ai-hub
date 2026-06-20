@@ -4,13 +4,14 @@ import { useEffect, useState } from 'react';
 import { useChatStore } from '@/store';
 import { useAuth } from '@/contexts/AuthContext';
 import { BUILT_IN_SKILLS } from '@ai-hub/skills-registry';
-import { CheckCircle, XCircle, LogOut } from 'lucide-react';
+import { CheckCircle, XCircle, LogOut, Eye, EyeOff } from 'lucide-react';
 
 export default function SettingsPage() {
-  const { activeSkills, toggleSkill } = useChatStore();
+  const { activeSkills, toggleSkill, apiKeys, setApiKey } = useChatStore();
   const { user, googleToken, signOut } = useAuth();
   const [driveConnected, setDriveConnected] = useState<boolean | null>(null);
   const [memoryLines, setMemoryLines] = useState<number | null>(null);
+  const [showKey, setShowKey] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     const headers: Record<string, string> = {};
@@ -57,23 +58,47 @@ export default function SettingsPage() {
           </section>
         )}
 
-        {/* API Keys info */}
+        {/* API Keys */}
         <section>
-          <h2 className="text-sm font-semibold mb-3">API Keys</h2>
-          <div className="bg-card border border-border rounded-xl p-4 text-sm text-muted-foreground space-y-2">
-            <p>
-              API keys are configured via environment variables on the server — they never reach the
-              browser.
-            </p>
-            <p className="font-mono text-xs bg-secondary px-3 py-2 rounded-lg mt-2 space-y-1">
-              <span className="block">ANTHROPIC_API_KEY=sk-ant-...</span>
-              <span className="block">OPENAI_API_KEY=sk-...</span>
-              <span className="block">GEMINI_API_KEY=AI...</span>
-            </p>
-            <p className="text-xs">
-              Add these to your <span className="font-mono">.env.local</span> file or hosting
-              provider environment.
-            </p>
+          <h2 className="text-sm font-semibold mb-1">API Keys</h2>
+          <p className="text-xs text-muted-foreground mb-3">
+            Stored locally. Sent to your server only — never returned to browser.
+          </p>
+          <div className="space-y-3">
+            {(
+              [
+                { provider: 'anthropic', label: 'Anthropic (Claude)', placeholder: 'sk-ant-...' },
+                { provider: 'openai', label: 'OpenAI (ChatGPT)', placeholder: 'sk-...' },
+                { provider: 'gemini', label: 'Google (Gemini)', placeholder: 'AIza...' },
+              ] as const
+            ).map(({ provider, label, placeholder }) => (
+              <div key={provider} className="bg-card border border-border rounded-xl px-4 py-3">
+                <label className="text-xs text-muted-foreground block mb-1.5">{label}</label>
+                <div className="flex items-center gap-2">
+                  <input
+                    type={showKey[provider] ? 'text' : 'password'}
+                    value={apiKeys[provider]}
+                    onChange={e => setApiKey(provider, e.target.value)}
+                    placeholder={placeholder}
+                    className="flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground/40 font-mono"
+                  />
+                  <button
+                    onClick={() => setShowKey(s => ({ ...s, [provider]: !s[provider] }))}
+                    className="text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                  >
+                    {showKey[provider] ? <EyeOff size={14} /> : <Eye size={14} />}
+                  </button>
+                  {apiKeys[provider] && (
+                    <button
+                      onClick={() => setApiKey(provider, '')}
+                      className="text-xs text-muted-foreground hover:text-foreground transition-colors shrink-0"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
           </div>
         </section>
 
