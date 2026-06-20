@@ -7,7 +7,8 @@ import { composeSystemPrompt, BUILT_IN_SKILLS } from '@ai-hub/skills-registry';
 import MessageBubble from '@/components/MessageBubble';
 import SkillChips from '@/components/SkillChips';
 import ProviderSelector from '@/components/ProviderSelector';
-import { Send, Plus } from 'lucide-react';
+import { Send, Plus, Settings } from 'lucide-react';
+import Link from 'next/link';
 
 export default function ChatPage() {
   const { googleToken } = useAuth();
@@ -30,6 +31,15 @@ export default function ChatPage() {
   const messages = conversation?.messages.filter(m => m.role !== 'system') ?? [];
   const hasMessages = messages.length > 0;
 
+  const providerKeyMap: Record<string, keyof typeof apiKeys> = {
+    claude: 'anthropic',
+    openai: 'openai',
+    gemini: 'gemini',
+  };
+  const activeKeyField = providerKeyMap[activeProvider];
+  const hasActiveKey = activeKeyField ? !!apiKeys[activeKeyField] : false;
+  const hasAnyKey = Object.values(apiKeys).some(Boolean);
+
   const [input, setInput] = useState('');
   const bottomRef = useRef<HTMLDivElement>(null);
 
@@ -39,6 +49,7 @@ export default function ChatPage() {
 
   async function send() {
     if (!input.trim() || isStreaming) return;
+    if (!hasActiveKey) return;
 
     let convId = activeId;
     if (!convId) {
@@ -140,9 +151,41 @@ export default function ChatPage() {
         </div>
       ) : (
         <div className="flex-1 flex flex-col items-center justify-center">
-          <h1 className="text-2xl font-semibold text-foreground mb-8">
-            Pronto quando você quiser.
-          </h1>
+          {!hasAnyKey ? (
+            <div className="flex flex-col items-center gap-4 text-center px-6">
+              <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center">
+                <Settings size={22} className="text-primary" />
+              </div>
+              <div>
+                <h1 className="text-xl font-semibold text-foreground mb-1">Configure suas chaves de API</h1>
+                <p className="text-sm text-muted-foreground max-w-xs">
+                  Adicione pelo menos uma chave para começar a usar o AI Hub.
+                </p>
+              </div>
+              <Link
+                href="/settings"
+                className="mt-1 px-4 py-2 rounded-xl bg-primary text-white text-sm font-medium hover:opacity-90 transition-opacity"
+              >
+                Ir para Configurações
+              </Link>
+            </div>
+          ) : !hasActiveKey ? (
+            <div className="flex flex-col items-center gap-3 text-center px-6">
+              <p className="text-sm text-muted-foreground">
+                Chave para <span className="text-foreground font-medium capitalize">{activeProvider}</span> não configurada.
+              </p>
+              <Link
+                href="/settings"
+                className="text-xs text-primary hover:underline"
+              >
+                Configurar em Settings
+              </Link>
+            </div>
+          ) : (
+            <h1 className="text-2xl font-semibold text-foreground mb-8">
+              Pronto quando você quiser.
+            </h1>
+          )}
         </div>
       )}
 
@@ -172,13 +215,20 @@ export default function ChatPage() {
               </div>
               <button
                 onClick={send}
-                disabled={!input.trim() || isStreaming}
+                disabled={!input.trim() || isStreaming || !hasActiveKey}
                 className="w-7 h-7 flex items-center justify-center rounded-full bg-white disabled:bg-white/10 text-black disabled:text-muted-foreground transition-colors disabled:cursor-not-allowed"
               >
                 <Send size={13} />
               </button>
             </div>
           </div>
+
+          {!hasActiveKey && (
+            <p className="text-xs text-center text-muted-foreground">
+              Chave para <span className="capitalize font-medium text-foreground">{activeProvider}</span> não configurada.{' '}
+              <Link href="/settings" className="text-primary hover:underline">Configurar</Link>
+            </p>
+          )}
 
           {/* Skill chips */}
           <SkillChips skills={BUILT_IN_SKILLS} activeIds={activeSkills} onToggle={toggleSkill} />
